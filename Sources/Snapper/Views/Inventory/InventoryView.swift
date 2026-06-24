@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct InventoryView: View {
+    @ObservedObject var connection: ServerConnection
     let snapshot: RedfishSnapshot
 
     var body: some View {
@@ -8,6 +9,7 @@ struct InventoryView: View {
             identityCard
             if !snapshot.processors.isEmpty { processorsCard }
             if !snapshot.memory.isEmpty { memoryCard }
+            NetworkAdaptersCard(connection: connection)
             if !snapshot.ethernet.isEmpty { networkCard }
         }
     }
@@ -83,7 +85,7 @@ struct InventoryView: View {
     }
 
     private var networkCard: some View {
-        Card("Network Interfaces (\(snapshot.ethernet.count))", systemImage: "network") {
+        Card("Logical Interfaces (\(snapshot.ethernet.count))", systemImage: "point.3.connected.trianglepath.dotted") {
             ForEach(snapshot.ethernet) { nic in
                 HStack {
                     Image(systemName: nic.linkStatus == "LinkUp" ? "link" : "link.badge.plus")

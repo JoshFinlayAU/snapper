@@ -8,10 +8,20 @@ struct SnapperApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
-                .frame(minWidth: 1100, minHeight: 720)
+                .frame(minWidth: 1180, minHeight: 800)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
+        .defaultSize(width: 1440, height: 920)
+
+        // Detached virtual-console (KVM) windows, one per opened target.
+        WindowGroup(id: "console", for: ConsoleTarget.self) { $target in
+            if let target {
+                ConsoleWindowView(target: target)
+            }
+        }
+        .defaultSize(width: 1100, height: 760)
+
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Add Server…") {

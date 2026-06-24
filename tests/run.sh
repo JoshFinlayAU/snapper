@@ -17,6 +17,9 @@ SOURCES=(
     "$ROOT"/Sources/Snapper/Models/Redfish/Storage.swift
     "$ROOT"/Sources/Snapper/Models/Redfish/Inventory.swift
     "$ROOT"/Sources/Snapper/Models/Redfish/Manager.swift
+    "$ROOT"/Sources/Snapper/Models/Redfish/VirtualMedia.swift
+    "$ROOT"/Sources/Snapper/Models/Redfish/NetworkAdapter.swift
+    "$ROOT"/Sources/Snapper/Models/Redfish/BiosRegistry.swift
     "$ROOT"/Sources/Snapper/Networking/RedfishSnapshot.swift
     "$ROOT"/tests/Fixtures.swift
     "$ROOT"/tests/main.swift

@@ -26,12 +26,31 @@ struct SavedServer: Codable, Identifiable, Hashable {
         self.tags = tags
     }
 
-    /// Display address, e.g. "10.0.0.5:443".
-    var displayAddress: String {
-        let cleaned = host
+    /// Bare host/IP without scheme or path, e.g. "10.0.0.5".
+    var bareHost: String {
+        host
             .replacingOccurrences(of: "https://", with: "")
             .replacingOccurrences(of: "http://", with: "")
-        if let port { return "\(cleaned):\(port)" }
-        return cleaned
+            .split(separator: "/").first.map(String.init) ?? host
+    }
+
+    /// Display address, e.g. "10.0.0.5:443".
+    var displayAddress: String {
+        if let port { return "\(bareHost):\(port)" }
+        return bareHost
+    }
+
+    /// The iDRAC web UI / HTML5 virtual-console base URL.
+    var webConsoleURL: URL? {
+        var comps = URLComponents()
+        comps.scheme = "https"
+        comps.host = bareHost
+        if let port { comps.port = port }
+        return comps.url
+    }
+
+    /// A `vnc://host:port` URL handed off to macOS Screen Sharing.
+    func vncURL(port: Int) -> URL? {
+        URL(string: "vnc://\(bareHost):\(port)")
     }
 }

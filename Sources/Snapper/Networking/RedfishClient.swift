@@ -97,6 +97,29 @@ actor RedfishClient {
         return data
     }
 
+    /// PATCH a JSON resource (e.g. to change a writable property like AssetTag or Boot override).
+    @discardableResult
+    func patch(_ path: String, payload: [String: Any]) async throws -> Data {
+        let body = try JSONSerialization.data(withJSONObject: payload)
+        guard let req = request(path: path, method: "PATCH", body: body) else {
+            throw RedfishError.invalidURL(path)
+        }
+        let (data, response) = try await send(req, path: path)
+        try Self.validate(response, path: path, data: data)
+        return data
+    }
+
+    /// DELETE a resource (e.g. a RAID volume).
+    @discardableResult
+    func delete(_ path: String) async throws -> Data {
+        guard let req = request(path: path, method: "DELETE") else {
+            throw RedfishError.invalidURL(path)
+        }
+        let (data, response) = try await send(req, path: path)
+        try Self.validate(response, path: path, data: data)
+        return data
+    }
+
     private func send(_ req: URLRequest, path: String) async throws -> (Data, URLResponse) {
         do {
             return try await session.data(for: req)

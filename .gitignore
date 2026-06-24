@@ -13,3 +13,29 @@ build/
 *.xcodeproj
 xcuserdata/
 DerivedData/
+
+# openapi
+openapi-7.xx.yaml
+
+# Signing & notarization secrets — never commit private keys, certs or credentials.
+# (Snapper.entitlements and build.sh are safe to track; Team IDs/cert names are public.)
+*.p12
+*.pfx
+*.cer
+*.crt
+*.pem
+*.key
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+# App Store Connect API keys
+*.p8
+AuthKey_*.p8
+
+# Credentials / environment
+.env
+.env.*
+*.secret
+secrets/
+notary*.json
+appstoreconnect*.json

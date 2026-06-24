@@ -10,6 +10,7 @@ struct RedfishSnapshot {
     var manager: Manager?
     var storage: [StorageSubsystem]
     var drives: [Drive]
+    var volumes: [Volume]
     var processors: [Processor]
     var memory: [MemoryModule]
     var ethernet: [EthernetInterface]
@@ -23,6 +24,7 @@ struct RedfishSnapshot {
          manager: Manager? = nil,
          storage: [StorageSubsystem] = [],
          drives: [Drive] = [],
+         volumes: [Volume] = [],
          processors: [Processor] = [],
          memory: [MemoryModule] = [],
          ethernet: [EthernetInterface] = [],
@@ -35,6 +37,7 @@ struct RedfishSnapshot {
         self.manager = manager
         self.storage = storage
         self.drives = drives
+        self.volumes = volumes
         self.processors = processors
         self.memory = memory
         self.ethernet = ethernet

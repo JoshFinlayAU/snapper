@@ -66,6 +66,78 @@ struct RedfishStatus: Codable, Hashable {
     }
 }
 
+/// A loosely-typed JSON scalar, used for free-form attribute maps (BIOS attributes,
+/// iDRAC Dell attributes) whose value types vary per key and aren't known ahead of time.
+enum JSONValue: Codable, Equatable, Hashable {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case null
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if c.decodeNil() { self = .null }
+        else if let b = try? c.decode(Bool.self) { self = .bool(b) }
+        else if let i = try? c.decode(Int.self) { self = .int(i) }
+        else if let d = try? c.decode(Double.self) { self = .double(d) }
+        else if let s = try? c.decode(String.self) { self = .string(s) }
+        else { self = .null }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .string(let s): try c.encode(s)
+        case .int(let i): try c.encode(i)
+        case .double(let d): try c.encode(d)
+        case .bool(let b): try c.encode(b)
+        case .null: try c.encodeNil()
+        }
+    }
+
+    /// A human-editable string form of the value.
+    var display: String {
+        switch self {
+        case .string(let s): return s
+        case .int(let i): return String(i)
+        case .double(let d): return d == d.rounded() ? String(Int(d)) : String(d)
+        case .bool(let b): return b ? "true" : "false"
+        case .null: return ""
+        }
+    }
+
+    var boolValue: Bool {
+        switch self {
+        case .bool(let b): return b
+        case .string(let s): return s.lowercased() == "true" || s.lowercased() == "enabled"
+        case .int(let i): return i != 0
+        default: return false
+        }
+    }
+
+    /// Convert edited `text` back into a JSON-serializable value, preserving this value's
+    /// original type where possible so PATCH payloads keep the BMC's expected types.
+    func coerced(from text: String) -> Any {
+        switch self {
+        case .bool: return (text as NSString).boolValue
+        case .int: return Int(text) ?? text
+        case .double: return Double(text) ?? text
+        case .string, .null: return text
+        }
+    }
+}
+
+/// A Redfish resource that exposes a free-form `Attributes` map — e.g. `Bios`,
+/// `Bios/Settings`, and the iDRAC `Managers/{id}/Attributes` (Dell config) resource.
+struct AttributeResource: Codable {
+    var attributes: [String: JSONValue]?
+
+    enum CodingKeys: String, CodingKey {
+        case attributes = "Attributes"
+    }
+}
+
 /// A member collection wrapper, e.g. `Systems`, `Chassis`.
 struct RedfishCollection: Codable {
     let members: [ODataRef]

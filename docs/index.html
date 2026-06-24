@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Snapper — native macOS Redfish client for Dell iDRAC 9</title>
+<meta name="description" content="Snapper is a flashy, native macOS Redfish client with first-class Dell iDRAC 9 support: dashboards, thermal, power, storage/RAID, NIC transceivers, virtual media, KVM console, BIOS editor and more." />
+<link rel="icon" href="redfish.png" />
+<style>
+  :root {
+    --bg: #0d1017;
+    --bg-soft: #151a23;
+    --card: #1a2030;
+    --border: #283044;
+    --text: #e8ecf4;
+    --muted: #9aa6bd;
+    --accent: #3490f2;
+    --accent2: #7a4cf2;
+    --fish: #f0604d;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  .gradient-text {
+    background: linear-gradient(120deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* Hero */
+  header.hero {
+    position: relative;
+    text-align: center;
+    padding: 88px 24px 64px;
+    background:
+      radial-gradient(800px 400px at 50% -10%, rgba(52,144,242,0.18), transparent 70%),
+      radial-gradient(600px 300px at 80% 0%, rgba(122,76,242,0.14), transparent 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    width: 132px; height: 132px; object-fit: contain;
+    filter: drop-shadow(0 12px 30px rgba(240,96,77,0.35));
+    margin-bottom: 18px;
+  }
+  .hero h1 { font-size: 3.4rem; letter-spacing: -1.5px; font-weight: 800; }
+  .hero .tagline { font-size: 1.3rem; color: var(--muted); margin: 12px auto 8px; max-width: 640px; }
+  .badges { margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.8rem; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 12px; background: var(--bg-soft);
+  }
+  .cta { margin-top: 30px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 13px 24px; border-radius: 12px; font-weight: 600; font-size: 1rem;
+    border: 1px solid transparent; transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--accent), var(--accent2));
+    color: #fff; box-shadow: 0 8px 24px rgba(52,144,242,0.35);
+  }
+  .btn-ghost { background: var(--bg-soft); color: var(--text); border-color: var(--border); }
+
+  /* Sections */
+  section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  section h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  section .sub { color: var(--muted); margin-bottom: 34px; }
+
+  /* Features */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .feature {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; transition: border-color .15s ease, transform .15s ease;
+  }
+  .feature:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .feature .ico { font-size: 1.7rem; margin-bottom: 10px; }
+  .feature h3 { font-size: 1.08rem; margin-bottom: 6px; }
+  .feature p { color: var(--muted); font-size: 0.93rem; }
+
+  /* Download */
+  .download-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px; display: flex; gap: 28px; align-items: center; flex-wrap: wrap;
+  }
+  .download-card .info { flex: 1; min-width: 260px; }
+  .download-card h3 { font-size: 1.4rem; margin-bottom: 6px; }
+  .download-card p { color: var(--muted); }
+  .steps { margin: 14px 0 0; padding-left: 20px; color: var(--muted); font-size: 0.92rem; }
+  .steps li { margin: 4px 0; }
+  code {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 2px 7px; font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 0.86em; color: #cdd7ee;
+  }
+
+  /* Support */
+  .support-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .support-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; text-align: center;
+  }
+  .support-card .ico { font-size: 2rem; margin-bottom: 10px; }
+  .support-card h3 { margin-bottom: 6px; }
+  .support-card p { color: var(--muted); font-size: 0.92rem; margin-bottom: 14px; }
+
+  footer { padding: 40px 0 60px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2.4rem; }
+    .hero .tagline { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="logo" src="redfish.png" alt="Snapper logo" />
+    <h1><span class="gradient-text">Snapper</span></h1>
+    <p class="tagline">A flashy, native&nbsp;macOS Redfish client with first-class templates for <strong>Dell&nbsp;iDRAC&nbsp;9</strong>. Monitor and control your servers — health, power, thermals, storage, RAID and more — from one beautiful, multi-tab dashboard.</p>
+    <div class="badges">
+      <span class="badge">macOS 14+</span>
+      <span class="badge">Apple&nbsp;Silicon &amp; Intel</span>
+      <span class="badge">SwiftUI + Swift&nbsp;Charts</span>
+      <span class="badge">Signed &amp; notarized</span>
+    </div>
+    <div class="cta">
+      <a class="btn btn-primary" href="Snapper.zip">⬇&nbsp; Download for macOS</a>
+      <a class="btn btn-ghost" href="https://github.com/JoshFinlayAU/snapper" target="_blank" rel="noopener">★&nbsp; View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Everything in one place</h2>
+    <p class="sub">Generic Redfish under the hood, with rich Dell iDRAC 9 templates layered on top.</p>
+    <div class="grid">
+      <div class="feature"><div class="ico">🗂️</div><h3>Multi-server tabs</h3><p>Connect to several BMCs at once, each in its own live tab. Save servers with passwords kept in the macOS Keychain — never on disk.</p></div>
+      <div class="feature"><div class="ico">📊</div><h3>Live dashboard</h3><p>Hero health banner, stat tiles, radial gauges and a streaming power-trend chart that refreshes automatically.</p></div>
+      <div class="feature"><div class="ico">🌡️</div><h3>Thermal &amp; power</h3><p>Temperature and fan charts, per-sensor thresholds, PSU output, voltages, efficiency, and a capacity-aware power cap.</p></div>
+      <div class="feature"><div class="ico">💽</div><h3>Storage &amp; RAID</h3><p>Controllers, virtual disks and physical drives — detect the PERC, create or delete virtual disks, and blink a drive's locate LED.</p></div>
+      <div class="feature"><div class="ico">🔌</div><h3>NIC &amp; transceivers</h3><p>Network adapters down to per-port link, speed and MAC, plus pluggable transceiver details (SFP+/SFP28/QSFP, optic vs. DAC, vendor/part/serial).</p></div>
+      <div class="feature"><div class="ico">🎛️</div><h3>Controls</h3><p>Identify LED, one-time or persistent boot override, asset tag and power cap — applied over Redfish with instant feedback.</p></div>
+      <div class="feature"><div class="ico">💿</div><h3>Virtual media</h3><p>Mount and eject a remote ISO/IMG over HTTP/HTTPS/CIFS to boot from — right from the app.</p></div>
+      <div class="feature"><div class="ico">🖥️</div><h3>Virtual console (KVM)</h3><p>Open the iDRAC HTML5 console in an embedded window or your browser, or hand off to macOS Screen Sharing over VNC.</p></div>
+      <div class="feature"><div class="ico">🧬</div><h3>BIOS editor</h3><p>Registry-driven editing with proper dropdowns, integer bounds and validation, grouped by BIOS menu — staged for the next reboot.</p></div>
+      <div class="feature"><div class="ico">📡</div><h3>SNMP &amp; location</h3><p>Configure the SNMP agent, community, trap destinations, and the physical location iDRAC reports (data center / rack / slot).</p></div>
+      <div class="feature"><div class="ico">📜</div><h3>System Event Log</h3><p>Browse the SEL with severity filtering and search to triage hardware events fast.</p></div>
+      <div class="feature"><div class="ico">🔧</div><h3>Dell iDRAC template</h3><p>Firmware &amp; identity, Service Tag → Express Service Code, a direct Dell support link, and a subsystem health rollup.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <h2>Download</h2>
+    <p class="sub">A signed, notarized <code>.app</code> served directly — no App Store required.</p>
+    <div class="download-card">
+      <div class="info">
+        <h3>Snapper for macOS <span class="gradient-text">v1.0</span></h3>
+        <p>Universal build for Apple&nbsp;Silicon and Intel. Requires macOS&nbsp;14 (Sonoma) or later.</p>
+        <ol class="steps">
+          <li>Download and unzip <code>Snapper.zip</code>.</li>
+          <li>Drag <strong>Snapper.app</strong> into your <code>/Applications</code> folder.</li>
+          <li>Launch it, add a server (host, username, password), and connect.</li>
+        </ol>
+      </div>
+      <div>
+        <a class="btn btn-primary" href="Snapper.zip">⬇&nbsp; Download Snapper.zip</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="support">
+  <div class="wrap">
+    <h2>Support</h2>
+    <p class="sub">Found a bug or want a feature? It all happens on GitHub.</p>
+    <div class="support-grid">
+      <div class="support-card">
+        <div class="ico">🐛</div>
+        <h3>Report an issue</h3>
+        <p>Bugs, crashes or unexpected behaviour against your iDRAC — open a ticket and we'll take a look.</p>
+        <a class="btn btn-ghost" href="https://github.com/JoshFinlayAU/snapper/issues/new" target="_blank" rel="noopener">Open an issue</a>
+      </div>
+      <div class="support-card">
+        <div class="ico">💡</div>
+        <h3>Request a feature</h3>
+        <p>Have a Redfish endpoint or Dell capability you'd love to see? Suggestions are welcome.</p>
+        <a class="btn btn-ghost" href="https://github.com/JoshFinlayAU/snapper/issues" target="_blank" rel="noopener">Browse issues</a>
+      </div>
+      <div class="support-card">
+        <div class="ico">📦</div>
+        <h3>Source &amp; docs</h3>
+        <p>Snapper is built with SwiftUI. Browse the code, build it yourself, or read the README.</p>
+        <a class="btn btn-ghost" href="https://github.com/JoshFinlayAU/snapper" target="_blank" rel="noopener">View repository</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Snapper — native macOS Redfish client for Dell iDRAC 9.<br/>
+    Not affiliated with or endorsed by Dell Technologies. iDRAC and PowerEdge are trademarks of Dell.</p>
+    <p style="margin-top:10px;"><a href="https://github.com/JoshFinlayAU/snapper">GitHub</a> · <a href="https://github.com/JoshFinlayAU/snapper/issues">Support</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

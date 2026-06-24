@@ -19,6 +19,9 @@ struct ComputerSystem: Codable, Identifiable {
     var systemType: String?
     var uuid: String?
     var status: RedfishStatus?
+    var indicatorLED: String?
+    var locationIndicatorActive: Bool?
+    var boot: Boot?
 
     var processorSummary: ProcessorSummary?
     var memorySummary: MemorySummary?
@@ -73,6 +76,26 @@ struct ComputerSystem: Codable, Identifiable {
         }
     }
 
+    /// Boot configuration, including the one-time/persistent boot-source override.
+    struct Boot: Codable {
+        var bootSourceOverrideEnabled: String?   // Disabled, Once, Continuous
+        var bootSourceOverrideTarget: String?    // Pxe, Hdd, Cd, BiosSetup, Usb, …
+        var bootSourceOverrideMode: String?      // Legacy, UEFI
+        var allowableTargets: [String]?
+
+        enum CodingKeys: String, CodingKey {
+            case bootSourceOverrideEnabled = "BootSourceOverrideEnabled"
+            case bootSourceOverrideTarget = "BootSourceOverrideTarget"
+            case bootSourceOverrideMode = "BootSourceOverrideMode"
+            case allowableTargets = "BootSourceOverrideTarget@Redfish.AllowableValues"
+        }
+
+        var isOverrideActive: Bool {
+            guard let enabled = bootSourceOverrideEnabled else { return false }
+            return enabled != "Disabled"
+        }
+    }
+
     struct Actions: Codable {
         var reset: ResetAction?
         enum CodingKeys: String, CodingKey {
@@ -105,6 +128,9 @@ struct ComputerSystem: Codable, Identifiable {
         case systemType = "SystemType"
         case uuid = "UUID"
         case status = "Status"
+        case indicatorLED = "IndicatorLED"
+        case locationIndicatorActive = "LocationIndicatorActive"
+        case boot = "Boot"
         case processorSummary = "ProcessorSummary"
         case memorySummary = "MemorySummary"
         case bootProgress = "BootProgress"
@@ -119,4 +145,11 @@ struct ComputerSystem: Codable, Identifiable {
     }
 
     var isPoweredOn: Bool { powerState == "On" }
+
+    /// Whether the chassis identify/locate indicator is currently active, using the
+    /// modern boolean property when present and falling back to the legacy LED string.
+    var isIdentifyActive: Bool {
+        if let active = locationIndicatorActive { return active }
+        return indicatorLED == "Blinking" || indicatorLED == "Lit"
+    }
 }

@@ -3,7 +3,7 @@ import Security
 
 /// Stores per-server passwords in the macOS login Keychain as generic password items.
 enum KeychainService {
-    private static let service = "net.kinetix.Snapper"
+    private static let service = "au.com.athenanetworks.Snapper"
 
     static func setPassword(_ password: String, for id: UUID) {
         let account = id.uuidString

@@ -7,7 +7,7 @@
     <key>CFBundleDisplayName</key>
     <string>Snapper</string>
     <key>CFBundleIdentifier</key>
-    <string>net.kinetix.Snapper</string>
+    <string>au.com.athenanetworks.Snapper</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>

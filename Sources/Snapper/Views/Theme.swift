@@ -35,6 +35,27 @@ enum Theme {
     }
 }
 
+/// The app's "redfish" logo, loaded from the bundled PNG with an SF Symbol fallback.
+struct BrandLogo: View {
+    var size: CGFloat = 64
+
+    var body: some View {
+        if let url = Bundle.module.url(forResource: "redfish", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            Image(nsImage: image)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .accessibilityLabel("Snapper")
+        } else {
+            Image(systemName: "server.rack")
+                .font(.system(size: size * 0.8))
+                .foregroundStyle(Theme.headerGradient)
+        }
+    }
+}
+
 /// A rounded translucent card container used throughout the dashboard.
 struct Card<Content: View>: View {
     var title: String?

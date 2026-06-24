@@ -2,6 +2,113 @@ import Foundation
 
 /// Realistic Dell iDRAC 9 Redfish JSON payloads (trimmed) for decoding tests.
 enum Fixtures {
+    static let biosRegistry = #"""
+    {
+      "@odata.id": "/redfish/v1/Systems/System.Embedded.1/Bios/BiosRegistry",
+      "RegistryEntries": {
+        "Attributes": [
+          {
+            "AttributeName": "BootMode",
+            "DisplayName": "Boot Mode",
+            "HelpText": "Determines the firmware boot mode.",
+            "Type": "Enumeration",
+            "ReadOnly": false,
+            "MenuPath": "./SystemBiosSettings/BootSettings",
+            "DisplayOrder": 100,
+            "Value": [
+              { "ValueName": "Bios", "ValueDisplayName": "BIOS" },
+              { "ValueName": "Uefi", "ValueDisplayName": "UEFI" }
+            ]
+          },
+          {
+            "AttributeName": "MemTest",
+            "DisplayName": "Memory Test",
+            "Type": "Integer",
+            "ReadOnly": false,
+            "LowerBound": 0,
+            "UpperBound": 10,
+            "MenuPath": "./SystemBiosSettings/MemSettings"
+          },
+          {
+            "AttributeName": "AssetTag",
+            "DisplayName": "Asset Tag",
+            "Type": "String",
+            "ReadOnly": true,
+            "MaxLength": 20,
+            "MenuPath": "./SystemBiosSettings/MiscSettings"
+          }
+        ]
+      }
+    }
+    """#
+
+    static let networkAdapter = #"""
+    {
+      "@odata.id": "/redfish/v1/Chassis/System.Embedded.1/NetworkAdapters/NIC.Embedded.1",
+      "Id": "NIC.Embedded.1",
+      "Name": "Network Adapter View",
+      "Manufacturer": "Broadcom Inc. and subsidiaries",
+      "Model": "BCM57504 NetXtreme-E",
+      "PartNumber": "0DCWFP",
+      "SerialNumber": "VNFCVBA199007W",
+      "SKU": null,
+      "Controllers": [ { "FirmwarePackageVersion": "22.91.5" } ],
+      "Status": { "State": "Enabled", "Health": "OK" }
+    }
+    """#
+
+    static let networkPort = #"""
+    {
+      "@odata.id": "/redfish/v1/Chassis/System.Embedded.1/NetworkAdapters/NIC.Embedded.1/NetworkPorts/NIC.Embedded.1-1",
+      "Id": "NIC.Embedded.1-1",
+      "Name": "Network Port View",
+      "LinkStatus": "LinkUp",
+      "ActiveLinkTechnology": "Ethernet",
+      "PhysicalPortNumber": "1",
+      "CurrentLinkSpeedMbps": 25000,
+      "AssociatedNetworkAddresses": ["B0:7B:25:00:11:22"],
+      "SupportedLinkCapabilities": [ { "LinkSpeedMbps": 25000, "LinkNetworkTechnology": "Ethernet" } ]
+    }
+    """#
+
+    static let transceiver = #"""
+    {
+      "@odata.id": "/redfish/v1/Chassis/System.Embedded.1/NetworkAdapters/NIC.Embedded.1/NetworkPorts/NIC.Embedded.1-1/Oem/Dell/DellNetworkTransceivers/NIC.Embedded.1-1",
+      "Id": "NIC.Embedded.1-1",
+      "Name": "DellNetworkTransceiver",
+      "DeviceDescription": "Network Transceiver in NIC in Embedded Slot 1 Port 1",
+      "FQDD": "NetworkTransceiver.Embedded.1-1",
+      "IdentifierType": "SFP/SFP+/SFP28",
+      "InterfaceType": "OpticalFiber",
+      "PartNumber": "AFBR-57F5MZ-ELX",
+      "Revision": " ",
+      "SerialNumber": "AA1726J00HT",
+      "VendorName": "EMULEX"
+    }
+    """#
+
+    static let virtualMedia = #"""
+    {
+      "@odata.id": "/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/RemovableDisk",
+      "Id": "RemovableDisk",
+      "Name": "Virtual Removable Disk",
+      "Image": "//host/share/win.iso",
+      "ImageName": "win.iso",
+      "Inserted": true,
+      "WriteProtected": true,
+      "ConnectedVia": "URI",
+      "MediaTypes": ["CD", "DVD"],
+      "Actions": {
+        "#VirtualMedia.InsertMedia": {
+          "target": "/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/RemovableDisk/Actions/VirtualMedia.InsertMedia"
+        },
+        "#VirtualMedia.EjectMedia": {
+          "target": "/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/RemovableDisk/Actions/VirtualMedia.EjectMedia"
+        }
+      }
+    }
+    """#
+
     static let serviceRoot = #"""
     {
       "@odata.id": "/redfish/v1",
@@ -32,7 +139,17 @@ enum Fixtures {
       "BiosVersion": "2.19.1",
       "SystemType": "Physical",
       "UUID": "4c4c4544-0042-4310-8044-b1c04f303233",
+      "AssetTag": "ACME-DC1-R12",
+      "IndicatorLED": "Blinking",
       "Status": { "State": "Enabled", "Health": "OK", "HealthRollup": "OK" },
+      "Boot": {
+        "BootSourceOverrideEnabled": "Once",
+        "BootSourceOverrideTarget": "Pxe",
+        "BootSourceOverrideMode": "UEFI",
+        "BootSourceOverrideTarget@Redfish.AllowableValues": [
+          "None", "Pxe", "Hdd", "Cd", "BiosSetup", "Utilities", "UefiTarget"
+        ]
+      },
       "ProcessorSummary": {
         "Count": 2,
         "Model": "Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz",

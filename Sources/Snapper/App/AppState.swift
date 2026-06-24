@@ -10,6 +10,16 @@ final class AppState: ObservableObject {
     @Published var selectedConnectionID: UUID?
     @Published var sidebarSelection: SidebarItem? = .servers
 
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        // `store` is a nested ObservableObject; its internal @Published changes don't
+        // automatically refresh views observing AppState, so forward them explicitly.
+        store.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+    }
+
     enum SidebarItem: Hashable {
         case servers
     }
@@ -45,6 +55,16 @@ final class AppState: ObservableObject {
     func reconnect(_ conn: ServerConnection) {
         conn.disconnect()
         Task { await conn.connect() }
+    }
+
+    /// Repoint a saved server at a new host/IP (e.g. after changing the iDRAC's static IP),
+    /// persist it, and reconnect the open tab to the new address.
+    func updateHost(for conn: ServerConnection, to newHost: String) {
+        guard var server = store.servers.first(where: { $0.id == conn.id }) else { return }
+        server.host = newHost
+        store.save(server, password: nil)        // password stays in the Keychain (keyed by id)
+        closeConnection(conn)
+        openConnection(for: server)
     }
 
     var selectedConnection: ServerConnection? {

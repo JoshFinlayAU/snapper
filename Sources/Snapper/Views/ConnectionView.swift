@@ -12,6 +12,8 @@ struct ConnectionView: View {
         case power = "Power"
         case storage = "Storage"
         case inventory = "Inventory"
+        case controls = "Controls"
+        case bios = "BIOS"
         case logs = "Logs"
         case idrac = "iDRAC"
 
@@ -23,6 +25,8 @@ struct ConnectionView: View {
             case .power: return "bolt.fill"
             case .storage: return "internaldrive.fill"
             case .inventory: return "shippingbox.fill"
+            case .controls: return "slider.horizontal.3"
+            case .bios: return "memorychip"
             case .logs: return "list.bullet.rectangle.fill"
             case .idrac: return "wrench.and.screwdriver.fill"
             }
@@ -33,6 +37,9 @@ struct ConnectionView: View {
         var all = Section.allCases
         if connection.snapshot?.isDell != true {
             all.removeAll { $0 == .idrac }
+        }
+        if connection.snapshot?.system?.bios == nil {
+            all.removeAll { $0 == .bios }
         }
         return all
     }
@@ -67,10 +74,12 @@ struct ConnectionView: View {
             case .dashboard: DashboardView(connection: connection, snapshot: snapshot)
             case .thermal: ThermalView(snapshot: snapshot, history: connection.history)
             case .power: PowerView(connection: connection, snapshot: snapshot)
-            case .storage: StorageView(snapshot: snapshot)
-            case .inventory: InventoryView(snapshot: snapshot)
+            case .storage: StorageView(connection: connection, snapshot: snapshot)
+            case .inventory: InventoryView(connection: connection, snapshot: snapshot)
+            case .controls: ControlsView(connection: connection, snapshot: snapshot)
+            case .bios: BiosView(connection: connection, snapshot: snapshot)
             case .logs: LogsView(logs: connection.logs)
-            case .idrac: DellView(snapshot: snapshot)
+            case .idrac: DellView(connection: connection, snapshot: snapshot)
             }
         } else {
             ProgressView("Loading…")

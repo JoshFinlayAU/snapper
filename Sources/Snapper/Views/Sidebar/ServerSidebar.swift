@@ -39,8 +39,9 @@ struct ServerSidebar: View {
     }
 
     private var header: some View {
-        HStack {
-            Label("Servers", systemImage: "server.rack")
+        HStack(spacing: 8) {
+            BrandLogo(size: 22)
+            Text("Snapper")
                 .font(.headline)
             Spacer()
             Button(action: onAdd) {
@@ -73,8 +74,7 @@ struct ServerSidebar: View {
             ForEach(appState.store.servers) { server in
                 ServerRow(
                     server: server,
-                    isConnected: appState.connections.contains { $0.id == server.id },
-                    health: appState.connections.first { $0.id == server.id }?.snapshot?.overallHealth
+                    connection: appState.connections.first { $0.id == server.id }
                 )
                 .contentShape(Rectangle())
                 .onTapGesture { appState.openConnection(for: server) }
@@ -93,14 +93,13 @@ struct ServerSidebar: View {
 
 private struct ServerRow: View {
     let server: SavedServer
-    let isConnected: Bool
-    let health: RedfishHealth?
+    let connection: ServerConnection?
 
     var body: some View {
         HStack(spacing: 10) {
             ZStack {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(Theme.headerGradient.opacity(isConnected ? 1 : 0.5))
+                    .fill(Theme.headerGradient.opacity(connection != nil ? 1 : 0.5))
                     .frame(width: 34, height: 34)
                 Image(systemName: "cpu")
                     .foregroundStyle(.white)
@@ -115,13 +114,34 @@ private struct ServerRow: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 4)
-            if let health {
-                Image(systemName: health.symbol)
-                    .foregroundStyle(health.color)
-            } else if isConnected {
-                ProgressView().controlSize(.small)
+            if let connection {
+                ConnectionStatusIcon(connection: connection)
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// Trailing status indicator for a server row. Observes the connection so the icon
+/// tracks its phase: spinner while connecting, error glyph on failure, health when up.
+private struct ConnectionStatusIcon: View {
+    @ObservedObject var connection: ServerConnection
+
+    var body: some View {
+        switch connection.phase {
+        case .idle, .connecting:
+            ProgressView().controlSize(.small)
+        case .failed:
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.red)
+                .help(connection.lastError ?? "Connection failed")
+        case .connected:
+            if let health = connection.snapshot?.overallHealth {
+                Image(systemName: health.symbol)
+                    .foregroundStyle(health.color)
+            } else {
+                ProgressView().controlSize(.small)
+            }
+        }
     }
 }

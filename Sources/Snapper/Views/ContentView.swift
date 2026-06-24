@@ -1,36 +1,52 @@
 import SwiftUI
 
+/// What the editor sheet is currently doing — adding a new server or editing an existing one.
+/// Driving the sheet with an Identifiable item (rather than a bool + separate state) guarantees
+/// the editor always receives the correct target instead of a stale value.
+enum EditorTarget: Identifiable {
+    case new
+    case existing(SavedServer)
+
+    var id: String {
+        switch self {
+        case .new: return "new"
+        case .existing(let server): return server.id.uuidString
+        }
+    }
+
+    var server: SavedServer? {
+        switch self {
+        case .new: return nil
+        case .existing(let server): return server
+        }
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
-    @State private var showingEditor = false
-    @State private var editingServer: SavedServer?
+    @State private var editorTarget: EditorTarget?
 
     var body: some View {
         NavigationSplitView {
             ServerSidebar(
-                onAdd: { presentEditor(nil) },
-                onEdit: { presentEditor($0) }
+                onAdd: { editorTarget = .new },
+                onEdit: { editorTarget = .existing($0) }
             )
             .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 340)
         } detail: {
             MainArea()
         }
-        .sheet(isPresented: $showingEditor) {
-            ServerEditorView(server: editingServer)
+        .sheet(item: $editorTarget) { target in
+            ServerEditorView(server: target.server)
         }
         .onReceive(NotificationCenter.default.publisher(for: .addServerRequested)) { _ in
-            presentEditor(nil)
+            editorTarget = .new
         }
         .onReceive(NotificationCenter.default.publisher(for: .refreshRequested)) { _ in
             if let conn = appState.selectedConnection {
                 Task { await conn.refresh() }
             }
         }
-    }
-
-    private func presentEditor(_ server: SavedServer?) {
-        editingServer = server
-        showingEditor = true
     }
 }
 
@@ -60,9 +76,7 @@ struct MainArea: View {
 struct EmptyStateView: View {
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: "server.rack")
-                .font(.system(size: 64))
-                .foregroundStyle(Theme.headerGradient)
+            BrandLogo(size: 96)
             Text("No server connected")
                 .font(.title2.weight(.semibold))
             Text("Select a server from the sidebar to connect, or press ⌘N to add one.")
